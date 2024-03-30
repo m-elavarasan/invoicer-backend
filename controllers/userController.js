@@ -31,10 +31,24 @@ const getUserByUsername = async (req, res) => {
 const createUser = async (req, res) => {
     const { username, email, password, name, dob, currency, phone, channel, role } = req.body;
 
+    // Check if  the user creating the new user is a SuperAdmin
+    if (role !== 'SuperAdmin') {
+        return res.status(403).json({ message: "You don't have permission to perform this action" });
+    }
+
     try {
         // Validate username
         if (!username || username.length < 4) {
             return res.status(400).json({ message: "Username must be at least 4 characters long" });
+        }
+
+        // If the new user's role is 'Admin', ensure that the user creating it is a SuperAdmin
+        if (role === 'Admin' && req.user.role !== 'SuperAdmin') {
+            return res.status(403).json({ message: "Only a SuperAdmin can create an Admin" });
+        }
+
+        if (!/^[a-zA-Z0-9_]{4,}$/.test(username)) {
+            return res.status(400).json({ message: "Username must contain only letters, numbers, and underscores" });
         }
         // Check if username already exists
         const existingUsername = await User.findOne({ username });
@@ -58,13 +72,16 @@ const createUser = async (req, res) => {
         }
 
         // Check if the channel exists
-        const existingChannel = await Channel.findById(channel);
+        const existingChannel = await Channel.findOne({ channelId: channel });
 
-        console.log('existingChannel', existingChannel)
         if (!existingChannel) {
             return res.status(400).json({ message: "Channel not found" });
         }
 
+        // Validate password
+        if (!password || password.length < 8) {
+            return res.status(400).json({ message: "Password must be at least 8 characters long" });
+        }
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -78,7 +95,7 @@ const createUser = async (req, res) => {
             currency,
             phone,
             role,
-            channel: existingChannel // Assign the channel to the newUser object
+            channel: existingChannel
         });
 
         // Save the new user to the database

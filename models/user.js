@@ -24,10 +24,19 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  channel: [{
+  role: {
+    type: String,
+    enum: ['SuperAdmin', 'Admin', 'StaffL1', 'StaffL2', 'Manager'],
+    default: 'StaffL1'
+  },
+  lastLogin: {
+    type: Date,
+    default: null
+  },
+  channel: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Channel'
-  }]
+  }
 });
 
 const User = mongoose.model('User', userSchema);

@@ -15,13 +15,19 @@ const loginUser = async (req, res) => {
         if (!validPassword) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
+
+        // Update last login session
+        user.lastLogin = new Date();
+        await user.save();
+
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
         res.json({
             token,
             user: {
                 channel: user.channel,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                lastLogin: user.lastLogin,
             }
         });
     } catch (error) {

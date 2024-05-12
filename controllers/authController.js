@@ -9,22 +9,22 @@ const loginUser = async (req, res) => {
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: "User not found!" });
+            return res.status(404).json({ message: "User not found" });
         }
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            return res.status(400).json({ message: "Invalid email or password" });
+            return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        // Update last login session
         user.lastLogin = new Date();
         await user.save();
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-        res.json({
+
+        res.status(200).json({
             token,
             user: {
-                channel: user.channel,
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 lastLogin: user.lastLogin,
@@ -35,7 +35,6 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
-
 const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 

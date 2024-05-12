@@ -4,9 +4,8 @@ const mongoose = require("mongoose");
 const userRoute = require("./routes/userRoute");
 const channelRoute = require("./routes/channelRoute");
 const authRoute = require("./routes/authRoutes");
-// const swaggerUi = require('swagger-ui-express');
-// const YAML = require('yamljs');
-// const swaggerDocument = YAML.load('./swagger.yaml');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./swagger');
 
 dotenv.config();
 
@@ -15,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 const basePath = "/v1/api";
 
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -23,8 +23,12 @@ mongoose
   })
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
-// app.use('/api', require('./routes/index'));
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Allow specific HTTP methods
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow specific headers
+  next();
+});
 
 app.use('/v1/api/users', userRoute);
 app.use('/v1/api/channels', channelRoute);

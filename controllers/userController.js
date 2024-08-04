@@ -13,11 +13,11 @@ const getUsers = async (req, res) => {
     }
 };
 
-const getUserByUsername = async (req, res) => {
-    const { username } = req.params;
+const getUserByUserId = async (req, res) => {
+    const { userId } = req.params;
 
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findById(userId).select('name email lastLogin channel role');
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -122,6 +122,6 @@ const isValidEmail = (email) => {
 
 module.exports = {
     getUsers,
-    getUserByUsername,
+    getUserByUserId,
     createUser
 };

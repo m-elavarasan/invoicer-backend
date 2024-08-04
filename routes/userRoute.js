@@ -5,7 +5,7 @@ const verifyToken = require('../middlewares/verifyToken');
 
 router.get('/', verifyToken, userController.getUsers);
 
-router.get('/:username', verifyToken, userController.getUserByUsername);
+router.get('/getUserById/:userId', verifyToken, userController.getUserByUserId);
 
 router.post('/create', userController.createUser);
 
